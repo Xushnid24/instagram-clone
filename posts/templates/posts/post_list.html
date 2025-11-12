@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Посты</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; }
+        .post { border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 10px; background: #fafafa; }
+        .post h2 { margin-bottom: 10px; }
+        .date { color: gray; font-size: 13px; }
+        a { text-decoration: none; color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Список постов</h1>
+
+    <a href="{% url 'post_create' %}">➕ Добавить новый пост</a>
+    <hr>
+
+    {% for post in posts %}
+        <div class="post">
+            <h2>{{ post.title }}</h2>
+            <p>{{ post.content }}</p>
+            <p class="date">{{ post.created_at|date:"d.m.Y H:i" }}</p>
+        </div>
+    {% empty %}
+        <p>Пока нет постов.</p>
+    {% endfor %}
+</body>
+</html>

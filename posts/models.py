@@ -1,12 +1,14 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.utils import timezone
+
 
 class Post(models.Model):
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='posts/')
-    caption = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    title = models.CharField(max_length=200, default="Без заголовка")
+    content = models.TextField(default="Пост пока пустой")
+    created_at = models.DateTimeField(default=timezone.now)
+
 
     def __str__(self):
-        return f"{self.author.username}: {self.caption[:20]}"
+        return self.title
+
 

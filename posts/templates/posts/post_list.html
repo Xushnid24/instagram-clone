@@ -8,7 +8,20 @@
         .post { border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 10px; background: #fafafa; }
         .post h2 { margin-bottom: 10px; }
         .date { color: gray; font-size: 13px; }
-        a { text-decoration: none; color: blue; }
+        a { text-decoration: none; color: blue; margin-left: 10px; }
+
+        .like-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: red;
+        }
+        .likes-count {
+            font-size: 14px;
+            color: #444;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -22,6 +35,16 @@
             <h2>{{ post.title }}</h2>
             <p>{{ post.content }}</p>
             <p class="date">{{ post.created_at|date:"d.m.Y H:i" }}</p>
+
+
+            <form action="{% url 'post_like' post.id %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button class="like-btn">❤️</button>
+            </form>
+            <span class="likes-count">{{ post.likes }} лайков</span>
+
+
+            <a href="{% url 'post_edit' post.id %}">✏️ Редактировать</a>
         </div>
     {% empty %}
         <p>Пока нет постов.</p>

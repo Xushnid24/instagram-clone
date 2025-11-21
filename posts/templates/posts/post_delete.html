@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Удалить пост</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width:600px; margin:40px auto; }
+        .card { border:1px solid #ddd; padding:20px; border-radius:8px; background:#fff; }
+        .danger { color:#b00; }
+        .actions { margin-top:15px; }
+        button, a.button { padding:8px 12px; border-radius:6px; text-decoration:none; }
+        button { background:#b00; color:#fff; border:none; cursor:pointer; }
+        a.button { background:#eee; color:#333; margin-left:10px; }
+    </style>
+</head>
+<body>
+    <h1>Подтвердите удаление</h1>
+    <div class="card">
+        <h2 class="danger">{{ post.title }}</h2>
+        <p>{{ post.content }}</p>
+        <p class="date">Создан: {{ post.created_at|date:"d.m.Y H:i" }}</p>
+
+        <div class="actions">
+            <form method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit">Удалить навсегда</button>
+            </form>
+            <a href="{% url 'post_list' %}" class="button">Отмена</a>
+        </div>
+    </div>
+</body>
+</html>

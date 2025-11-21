@@ -32,3 +32,10 @@ def post_like(request, post_id):
     post.likes += 1
     post.save()
     return redirect('post_list')
+
+def post_delete(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    if request.method == 'POST':
+        post.delete()
+        return redirect('post_list')
+    return render(request, 'posts/post_delete.html', {'post': post})

@@ -36,15 +36,14 @@
             <p>{{ post.content }}</p>
             <p class="date">{{ post.created_at|date:"d.m.Y H:i" }}</p>
 
-
             <form action="{% url 'post_like' post.id %}" method="post" style="display:inline;">
                 {% csrf_token %}
                 <button class="like-btn">❤️</button>
             </form>
             <span class="likes-count">{{ post.likes }} лайков</span>
 
-
             <a href="{% url 'post_edit' post.id %}">✏️ Редактировать</a>
+            <a href="{% url 'post_delete' post.id %}" style="color: red;">🗑 Удалить</a>
         </div>
     {% empty %}
         <p>Пока нет постов.</p>

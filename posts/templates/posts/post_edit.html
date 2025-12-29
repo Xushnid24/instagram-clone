@@ -1,17 +1,21 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="utf-8">
-  <title>Редактировать пост</title>
-</head>
-<body>
-  <h1>Редактировать: {{ post.title }}</h1>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Сохранить</button>
-  </form>
-  <br>
-  <a href="{% url 'post_list' %}">⬅ Назад к постам</a>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Редактировать пост{% endblock %}
+
+{% block content %}
+<div class="card card-custom p-4">
+    <h2 class="mb-3">Редактировать пост</h2>
+
+    {% if post.image %}
+        <p>Текущее изображение:</p>
+        <img src="{{ post.image.url }}" class="img-fluid rounded mb-3" style="max-width:300px;">
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-success">Сохранить</button>
+    </form>
+
+    <a href="{% url 'post_list' %}" class="btn btn-secondary mt-3">Назад</a>
+</div>
+{% endblock %}

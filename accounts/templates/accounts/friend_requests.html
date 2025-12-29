@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Запросы в друзья{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Запросы в друзья</h2>
+
+{% if requests %}
+    <ul class="list-group">
+        {% for req in requests %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ req.from_user.username }}
+                <div>
+                    <a href="{% url 'accept_friend_request' req.id %}" class="btn btn-success btn-sm me-2">Принять</a>
+                    <a href="{% url 'reject_friend_request' req.id %}" class="btn btn-danger btn-sm">Отклонить</a>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Нет новых запросов</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <div class="card shadow-sm p-4">
+
+        <div class="row align-items-center">
+            <!-- АВАТАР -->
+            <div class="col-4 text-center">
+                {% if profile.avatar %}
+                    <img src="{{ profile.avatar.url }}"
+                         class="rounded-circle"
+                         style="width:120px; height:120px; object-fit:cover;">
+                {% else %}
+                    <img src="https://via.placeholder.com/120"
+                         class="rounded-circle"
+                         style="width:120px; height:120px; object-fit:cover;">
+                {% endif %}
+            </div>
+
+            <!-- Имя + кнопки -->
+            <div class="col-8">
+
+                <h3 class="mb-0">{{ profile_user.username }}</h3>
+
+                <div class="d-flex mt-3 mb-3">
+                    <div class="me-4">
+                        <strong>{{ profile_user.post_set.count }}</strong> постов
+                    </div>
+                    <div>
+                        <strong>{{ profile.friends.count }}</strong> друзей
+                    </div>
+                </div>
+
+                {% if is_self %}
+                    <a href="#" class="btn btn-outline-secondary btn-sm">
+                        Редактировать профиль
+                    </a>
+                {% else %}
+
+                    {% if incoming_request %}
+                        <a href="{% url 'accept_friend_request' incoming_request.id %}"
+                           class="btn btn-success btn-sm me-2">Принять</a>
+                        <a href="{% url 'reject_friend_request' incoming_request.id %}"
+                           class="btn btn-danger btn-sm">Отклонить</a>
+
+                    {% elif is_friend %}
+                        <button class="btn btn-outline-secondary btn-sm" disabled>
+                            ✓ Вы друзья
+                        </button>
+
+                    {% elif request_sent %}
+                        <button class="btn btn-outline-warning btn-sm" disabled>
+                            Запрос отправлен
+                        </button>
+
+                    {% else %}
+                        <a href="{% url 'send_friend_request' profile_user.id %}"
+                           class="btn btn-primary btn-sm">
+                            Добавить в друзья
+                        </a>
+                    {% endif %}
+                {% endif %}
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="mt-4">
+        <h4>Друзья</h4>
+        <hr>
+
+        {% if profile.friends.count > 0 %}
+            <div class="row">
+                {% for f in profile.friends.all %}
+                    <div class="col-4 col-md-3 col-lg-2 text-center mb-3">
+                        <a href="{% url 'profile' f.user.id %}" class="text-decoration-none">
+                            <img src="https://via.placeholder.com/80"
+                                 class="rounded-circle mb-2"
+                                 style="width:80px; height:80px;">
+                            <div class="text-dark">{{ f.user.username }}</div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted">Пока нет друзей</p>
+        {% endif %}
+
+    </div>
+
+</div>
+{% endblock %}

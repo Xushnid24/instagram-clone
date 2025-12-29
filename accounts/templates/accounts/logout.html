@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Выход{% endblock %}
+
+{% block content %}
+<div class="card card-custom p-4 mx-auto" style="max-width: 350px;">
+    <h4 class="text-center mb-3">Вы вышли из аккаунта</h4>
+
+    <a href="{% url 'login' %}" class="btn btn-dark w-100">Войти снова</a>
+</div>
+{% endblock %}

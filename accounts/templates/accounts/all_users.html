@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Пользователи{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm p-4">
+
+    <h3 class="mb-3 text-center">Пользователи</h3>
+
+    <!-- Поиск -->
+    <div class="input-group mb-4">
+        <input
+            type="text"
+            id="searchInput"
+            class="form-control"
+            placeholder="Введите имя пользователя..."
+        >
+        <button class="btn btn-primary" onclick="searchUsers()">
+            Поиск
+        </button>
+    </div>
+
+    <!-- Список пользователей -->
+    <ul class="list-group" id="usersList">
+        {% for u in users %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="{% url 'profile' u.id %}">
+                    {{ u.username }}
+                </a>
+                <a href="{% url 'send_friend_request' u.id %}"
+                   class="btn btn-outline-primary btn-sm">
+                    Добавить
+                </a>
+            </li>
+        {% empty %}
+            <li class="list-group-item text-muted text-center">
+                Пользователей нет
+            </li>
+        {% endfor %}
+    </ul>
+
+</div>
+
+<script>
+function searchUsers() {
+    const query = document.getElementById('searchInput').value;
+    const list = document.getElementById('usersList');
+
+    fetch(`/accounts/search-users/?q=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            list.innerHTML = '';
+
+            if (data.length === 0) {
+                list.innerHTML = `
+                    <li class="list-group-item text-muted text-center">
+                        Ничего не найдено
+                    </li>
+                `;
+                return;
+            }
+
+            data.forEach(user => {
+                list.innerHTML += `
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="/accounts/profile/${user.id}/">
+                            ${user.username}
+                        </a>
+                        <a href="/accounts/send-request/${user.id}/"
+                           class="btn btn-outline-primary btn-sm">
+                            Добавить
+                        </a>
+                    </li>
+                `;
+            });
+        });
+}
+</script>
+
+{% endblock %}

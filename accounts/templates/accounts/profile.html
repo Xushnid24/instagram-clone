@@ -1,96 +1,404 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}{{ profile_user.username }} - Профиль{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 15px;
+    }
+
+    .avatar-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .avatar-img {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        border: 5px solid white;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        object-fit: cover;
+    }
+
+    .online-indicator {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        width: 25px;
+        height: 25px;
+        background: #10b981;
+        border: 3px solid white;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .friend-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 10px;
+        transition: transform 0.2s;
+    }
+
+    .friend-card:hover {
+        transform: scale(1.05);
+    }
+
+    .friend-avatar {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+    }
+
+    .action-buttons .btn {
+        margin: 0.25rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
 
-    <div class="card shadow-sm p-4">
+    <!-- Profile Header -->
+    <div class="profile-header text-white">
+        <div class="container">
+            <div class="row align-items-center">
 
-        <div class="row align-items-center">
-            <!-- АВАТАР -->
-            <div class="col-4 text-center">
-                {% if profile.avatar %}
-                    <img src="{{ profile.avatar.url }}"
-                         class="rounded-circle"
-                         style="width:120px; height:120px; object-fit:cover;">
-                {% else %}
-                    <img src="https://via.placeholder.com/120"
-                         class="rounded-circle"
-                         style="width:120px; height:120px; object-fit:cover;">
-                {% endif %}
-            </div>
+                <!-- Avatar -->
+                <div class="col-md-3 text-center">
+                    <div class="avatar-wrapper">
+                        {% if profile.avatar %}
+                            <img src="{{ profile.avatar.url }}" class="avatar-img" alt="{{ profile_user.username }}">
+                        {% else %}
+                            <img src="https://ui-avatars.com/api/?name={{ profile_user.username }}&size=150&background=667eea&color=fff"
+                                 class="avatar-img" alt="{{ profile_user.username }}">
+                        {% endif %}
 
-            <!-- Имя + кнопки -->
-            <div class="col-8">
-
-                <h3 class="mb-0">{{ profile_user.username }}</h3>
-
-                <div class="d-flex mt-3 mb-3">
-                    <div class="me-4">
-                        <strong>{{ profile_user.post_set.count }}</strong> постов
-                    </div>
-                    <div>
-                        <strong>{{ profile.friends.count }}</strong> друзей
+                        {% if profile.is_online %}
+                            <div class="online-indicator" title="В сети"></div>
+                        {% endif %}
                     </div>
                 </div>
 
-                {% if is_self %}
-                    <a href="#" class="btn btn-outline-secondary btn-sm">
-                        Редактировать профиль
-                    </a>
-                {% else %}
+                <!-- User Info -->
+                <div class="col-md-9">
+                    <div class="d-flex align-items-center mb-3">
+                        <h2 class="mb-0 me-3">{{ profile_user.username }}</h2>
 
-                    {% if incoming_request %}
-                        <a href="{% url 'accept_friend_request' incoming_request.id %}"
-                           class="btn btn-success btn-sm me-2">Принять</a>
-                        <a href="{% url 'reject_friend_request' incoming_request.id %}"
-                           class="btn btn-danger btn-sm">Отклонить</a>
+                        {% if profile.is_private %}
+                            <span class="badge bg-secondary">
+                                <i class="bi bi-lock"></i> Приватный
+                            </span>
+                        {% endif %}
+                    </div>
 
-                    {% elif is_friend %}
-                        <button class="btn btn-outline-secondary btn-sm" disabled>
-                            ✓ Вы друзья
-                        </button>
-
-                    {% elif request_sent %}
-                        <button class="btn btn-outline-warning btn-sm" disabled>
-                            Запрос отправлен
-                        </button>
-
-                    {% else %}
-                        <a href="{% url 'send_friend_request' profile_user.id %}"
-                           class="btn btn-primary btn-sm">
-                            Добавить в друзья
-                        </a>
+                    {% if profile_user.get_full_name %}
+                        <p class="lead mb-2">{{ profile_user.get_full_name }}</p>
                     {% endif %}
-                {% endif %}
 
+                    {% if profile.bio %}
+                        <p class="mb-3">{{ profile.bio }}</p>
+                    {% endif %}
+
+                    <div class="d-flex gap-3 mb-3">
+                        {% if profile.location %}
+                            <span><i class="bi bi-geo-alt"></i> {{ profile.location }}</span>
+                        {% endif %}
+                        {% if profile.website %}
+                            <a href="{{ profile.website }}" target="_blank" class="text-white">
+                                <i class="bi bi-link-45deg"></i> Website
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        {% if is_self %}
+                            <a href="{% url 'accounts:edit_profile' %}" class="btn btn-light">
+                                <i class="bi bi-pencil"></i> Редактировать профиль
+                            </a>
+                        {% else %}
+                            {% if incoming_request %}
+                                <button class="btn btn-success" onclick="handleFriendRequest({{ incoming_request.id }}, 'accept')">
+                                    <i class="bi bi-check-circle"></i> Принять запрос
+                                </button>
+                                <button class="btn btn-danger" onclick="handleFriendRequest({{ incoming_request.id }}, 'reject')">
+                                    <i class="bi bi-x-circle"></i> Отклонить
+                                </button>
+                            {% elif is_friend %}
+                                <button class="btn btn-light" disabled>
+                                    <i class="bi bi-check2"></i> Вы друзья
+                                </button>
+                                <button class="btn btn-outline-light" onclick="removeFriend({{ profile_user.id }})">
+                                    <i class="bi bi-person-dash"></i> Удалить из друзей
+                                </button>
+                            {% elif request_sent %}
+                                <button class="btn btn-warning" disabled>
+                                    <i class="bi bi-clock"></i> Запрос отправлен
+                                </button>
+                                <button class="btn btn-outline-light btn-sm" onclick="cancelRequest({{ profile_user.id }})">
+                                    Отменить
+                                </button>
+                            {% else %}
+                                <button class="btn btn-light" onclick="sendFriendRequest({{ profile_user.id }})">
+                                    <i class="bi bi-person-plus"></i> Добавить в друзья
+                                </button>
+                            {% endif %}
+
+                            <button class="btn btn-outline-light" onclick="sendMessage({{ profile_user.id }})">
+                                <i class="bi bi-chat"></i> Сообщение
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
-
     </div>
 
-    <div class="mt-4">
-        <h4>Друзья</h4>
-        <hr>
-
-        {% if profile.friends.count > 0 %}
-            <div class="row">
-                {% for f in profile.friends.all %}
-                    <div class="col-4 col-md-3 col-lg-2 text-center mb-3">
-                        <a href="{% url 'profile' f.user.id %}" class="text-decoration-none">
-                            <img src="https://via.placeholder.com/80"
-                                 class="rounded-circle mb-2"
-                                 style="width:80px; height:80px;">
-                            <div class="text-dark">{{ f.user.username }}</div>
-                        </a>
-                    </div>
-                {% endfor %}
+    <!-- Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h3 class="text-primary mb-0">{{ profile_user.post_set.count }}</h3>
+                <p class="text-muted mb-0">Постов</p>
             </div>
-        {% else %}
-            <p class="text-muted">Пока нет друзей</p>
-        {% endif %}
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h3 class="text-primary mb-0">{{ profile.friends.count }}</h3>
+                <p class="text-muted mb-0">Друзей</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h3 class="text-primary mb-0">{{ profile_user.date_joined|date:"Y" }}</h3>
+                <p class="text-muted mb-0">Год регистрации</p>
+            </div>
+        </div>
+    </div>
 
+    <!-- Friends Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">
+                    <i class="bi bi-people"></i> Друзья
+                    <span class="badge bg-primary">{{ profile.friends.count }}</span>
+                </h4>
+                {% if profile.friends.count > 12 %}
+                    <a href="{% url 'accounts:friends_list' profile_user.id %}" class="btn btn-sm btn-outline-primary">
+                        Показать всех
+                    </a>
+                {% endif %}
+            </div>
+
+            {% if profile.friends.count > 0 %}
+                <div class="row g-3">
+                    {% for friend in friends %}
+                        <div class="col-6 col-md-4 col-lg-2">
+                            <div class="friend-card">
+                                <a href="{% url 'accounts:profile' friend.user.id %}" class="text-decoration-none">
+                                    {% if friend.avatar %}
+                                        <img src="{{ friend.avatar.url }}" class="friend-avatar" alt="{{ friend.user.username }}">
+                                    {% else %}
+                                        <img src="https://ui-avatars.com/api/?name={{ friend.user.username }}&size=150"
+                                             class="friend-avatar" alt="{{ friend.user.username }}">
+                                    {% endif %}
+                                    <div class="p-2 text-center bg-light">
+                                        <small class="text-dark fw-bold">{{ friend.user.username }}</small>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-people" style="font-size: 3rem;"></i>
+                    <p class="mt-2">Пока нет друзей</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Posts Section -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h4 class="mb-3">
+                <i class="bi bi-grid"></i> Посты
+            </h4>
+
+            {% if posts %}
+                <div class="row g-2">
+                    {% for post in posts %}
+                        <div class="col-4">
+                            <a href="{% url 'post_detail' post.id %}">
+                                <img src="{{ post.image.url }}" class="img-fluid rounded" alt="Post">
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-image" style="font-size: 3rem;"></i>
+                    <p class="mt-2">Постов пока нет</p>
+                </div>
+            {% endif %}
+        </div>
     </div>
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// CSRF Token
+const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+// Отправить запрос в друзья
+async function sendFriendRequest(userId) {
+    try {
+        const response = await fetch(`/accounts/send-request/${userId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showNotification('Запрос отправлен!', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showNotification(data.error || 'Ошибка', 'danger');
+        }
+    } catch (error) {
+        showNotification('Ошибка сети', 'danger');
+    }
+}
+
+// Обработка запроса (принять/отклонить)
+async function handleFriendRequest(requestId, action) {
+    const url = action === 'accept'
+        ? `/accounts/accept-request/${requestId}/`
+        : `/accounts/reject-request/${requestId}/`;
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showNotification(data.message, 'success');
+            setTimeout(() => location.reload(), 1000);
+        }
+    } catch (error) {
+        showNotification('Ошибка', 'danger');
+    }
+}
+
+// Удалить из друзей
+async function removeFriend(userId) {
+    if (!confirm('Удалить из друзей?')) return;
+
+    try {
+        const response = await fetch(`/accounts/remove-friend/${userId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showNotification('Удалено из друзей', 'info');
+            setTimeout(() => location.reload(), 1000);
+        }
+    } catch (error) {
+        showNotification('Ошибка', 'danger');
+    }
+}
+
+// Отменить запрос
+async function cancelRequest(userId) {
+    if (!confirm('Отменить запрос в друзья?')) return;
+
+    try {
+        const response = await fetch(`/accounts/cancel-request/${userId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showNotification('Запрос отменён', 'info');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showNotification(data.error || 'Ошибка', 'danger');
+        }
+    } catch (error) {
+        showNotification('Ошибка сети', 'danger');
+    }
+}
+
+// Отправить сообщение
+function sendMessage(userId) {
+    // Перенаправление на страницу чата
+    window.location.href = `/messages/${userId}/`;
+}
+
+// Показать уведомление
+function showNotification(message, type = 'info') {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    alertDiv.style.top = '20px';
+    alertDiv.style.right = '20px';
+    alertDiv.style.zIndex = '9999';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alertDiv);
+
+    setTimeout(() => alertDiv.remove(), 3000);
+}
+</script>
 {% endblock %}

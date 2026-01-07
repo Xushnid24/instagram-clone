@@ -3,21 +3,79 @@
 {% block title %}Запросы в друзья{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">Запросы в друзья</h2>
+<div class="card shadow-sm">
+    <div class="card-body p-4">
+        <h2 class="mb-4">
+            <i class="bi bi-person-plus-fill"></i> Запросы в друзья
+            {% if incoming_requests %}
+                <span class="badge bg-primary">{{ incoming_requests|length }}</span>
+            {% endif %}
+        </h2>
 
-{% if requests %}
-    <ul class="list-group">
-        {% for req in requests %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                {{ req.from_user.username }}
-                <div>
-                    <a href="{% url 'accept_friend_request' req.id %}" class="btn btn-success btn-sm me-2">Принять</a>
-                    <a href="{% url 'reject_friend_request' req.id %}" class="btn btn-danger btn-sm">Отклонить</a>
-                </div>
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>Нет новых запросов</p>
-{% endif %}
+        {% if incoming_requests %}
+            <ul class="list-group">
+                {% for req in incoming_requests %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <div class="d-flex align-items-center gap-3">
+                            {% if req.from_user.profile.avatar %}
+                                <img src="{{ req.from_user.profile.avatar.url }}"
+                                     alt="{{ req.from_user.username }}"
+                                     class="rounded-circle"
+                                     style="width: 50px; height: 50px; object-fit: cover;">
+                            {% else %}
+                                <img src="https://ui-avatars.com/api/?name={{ req.from_user.username }}&size=50"
+                                     alt="{{ req.from_user.username }}"
+                                     class="rounded-circle">
+                            {% endif %}
+
+                            <div>
+                                <a href="{% url 'accounts:profile' req.from_user.id %}"
+                                   class="fw-bold text-decoration-none">
+                                    {{ req.from_user.username }}
+                                </a>
+
+                                {% if req.from_user.get_full_name %}
+                                    <div class="text-muted small">
+                                        {{ req.from_user.get_full_name }}
+                                    </div>
+                                {% endif %}
+
+                                <div class="text-muted small">
+                                    <i class="bi bi-clock"></i>
+                                    {{ req.timestamp|timesince }} назад
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <!-- Принять -->
+                            <form action="{% url 'accounts:accept_friend_request' req.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class="bi bi-check-circle"></i> Принять
+                                </button>
+                            </form>
+
+                            <!-- Отклонить -->
+                            <form action="{% url 'accounts:reject_friend_request' req.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-x-circle"></i> Отклонить
+                                </button>
+                            </form>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox" style="font-size: 4rem; color: #dbdbdb;"></i>
+                <p class="text-muted mt-3 mb-0">Нет новых запросов в друзья</p>
+                <small class="text-muted">
+                    Когда кто-то отправит вам запрос, он появится здесь
+                </small>
+            </div>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

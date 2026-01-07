@@ -1,20 +1,137 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
 {% block title %}Вход{% endblock %}
 
+{% block extra_css %}
+<style>
+    .auth-container {
+        max-width: 400px;
+        margin: 50px auto;
+    }
+    .auth-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .auth-header {
+        text-align: center;
+        padding: 30px 30px 20px;
+        border-bottom: 1px solid #dbdbdb;
+    }
+    .auth-header h2 {
+        font-size: 24px;
+        font-weight: 600;
+        color: #262626;
+    }
+    .auth-body {
+        padding: 30px;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #262626;
+        font-size: 14px;
+    }
+    .form-control {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #dbdbdb;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: #0095f6;
+        box-shadow: 0 0 0 3px rgba(0, 149, 246, 0.1);
+    }
+    .btn-submit {
+        width: 100%;
+        padding: 12px;
+        background: #0095f6;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        font-size: 14px;
+    }
+    .btn-submit:hover {
+        background: #0077cc;
+    }
+    .auth-footer {
+        text-align: center;
+        padding: 20px 30px 30px;
+        color: #8e8e8e;
+        font-size: 14px;
+    }
+    .auth-footer a {
+        color: #0095f6;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .auth-footer a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="card card-custom p-4 mx-auto" style="max-width: 400px;">
-    <h3 class="text-center mb-3">Вход</h3>
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2><i class="bi bi-box-arrow-in-right"></i> Вход</h2>
+        </div>
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
+        <div class="auth-body">
+            <!-- Сообщения -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
 
-        <button class="btn btn-dark w-100 mt-2">Войти</button>
-    </form>
+            <!-- Форма входа -->
+            <form method="post">
+                {% csrf_token %}
 
-    <p class="text-center mt-3">
-        Нет аккаунта?
-        <a href="{% url 'register' %}">Регистрация</a>
-    </p>
+                <div class="form-group">
+                    <label for="username">Имя пользователя или Email:</label>
+                    <input type="text"
+                           id="username"
+                           name="username"
+                           class="form-control"
+                           placeholder="Введите логин или email"
+                           required
+                           autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Пароль:</label>
+                    <input type="password"
+                           id="password"
+                           name="password"
+                           class="form-control"
+                           placeholder="Введите пароль"
+                           required>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    Войти
+                </button>
+            </form>
+        </div>
+
+        <div class="auth-footer">
+            Нет аккаунта? <a href="{% url 'accounts:register' %}">Зарегистрироваться</a>
+        </div>
+    </div>
 </div>
 {% endblock %}

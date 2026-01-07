@@ -3,7 +3,7 @@ from .views import (
     register_view, login_view, logout_view,
     send_friend_request, friend_requests,
     accept_friend_request, reject_friend_request,
-    all_users, profile_view, search_users
+    all_users, profile_view, search_users, edit_profile
 )
 
 
@@ -19,6 +19,7 @@ urlpatterns = [
     path('users/', all_users, name='all_users'),
     path('profile/<int:user_id>/', profile_view, name='profile'),
     path('search-users/', search_users, name='search_users'),
+    path('profile/edit/', edit_profile, name='edit_profile'),
 
 
 

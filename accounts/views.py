@@ -3,10 +3,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from .forms import RegisterForm
+from .forms import RegisterForm, ProfileEditForm
 from .models import FriendRequest, Profile
 from django.http import JsonResponse
-
+from posts.models import Post
 
 def register_view(request):
     if request.method == 'POST':
@@ -105,13 +105,10 @@ def all_users(request):
 @login_required
 def profile_view(request, user_id):
     profile_user = get_object_or_404(User, id=user_id)
-    profile, created = Profile.objects.get_or_create(user=profile_user)
+    profile = profile_user.profile
 
-    is_self = (request.user == profile_user)
-
-
+    is_self = request.user == profile_user
     is_friend = profile.friends.filter(user=request.user).exists()
-
 
     request_sent = FriendRequest.objects.filter(
         from_user=request.user,
@@ -120,7 +117,6 @@ def profile_view(request, user_id):
         rejected=False
     ).exists()
 
-
     incoming_request = FriendRequest.objects.filter(
         from_user=profile_user,
         to_user=request.user,
@@ -128,14 +124,18 @@ def profile_view(request, user_id):
         rejected=False
     ).first()
 
+    posts = Post.objects.filter(author=profile_user).order_by('-created_at')
+
     return render(request, 'accounts/profile.html', {
         'profile_user': profile_user,
         'profile': profile,
         'is_self': is_self,
         'is_friend': is_friend,
         'request_sent': request_sent,
-        'incoming_request': incoming_request
+        'incoming_request': incoming_request,
+        'posts': posts
     })
+
 
 @login_required
 def search_users(request):
@@ -150,3 +150,18 @@ def search_users(request):
         })
 
     return JsonResponse(data, safe=False)
+
+@login_required
+def edit_profile(request):
+    profile = request.user.profile
+
+    if request.method == 'POST':
+        form = ProfileEditForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('profile', user_id=request.user.id)
+    else:
+        form = ProfileEditForm(instance=profile)
+
+    return render(request, 'accounts/edit_profile.html', {'form': form})
+

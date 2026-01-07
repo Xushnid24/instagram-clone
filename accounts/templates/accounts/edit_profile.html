@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4" style="max-width:500px;">
+    <div class="card shadow-sm p-4">
+
+        <h4 class="mb-3">Редактировать профиль</h4>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label">Аватар</label>
+                {{ form.avatar }}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">О себе</label>
+                {{ form.bio }}
+            </div>
+
+            <button class="btn btn-primary w-100">
+                Сохранить
+            </button>
+        </form>
+
+    </div>
+</div>
+{% endblock %}

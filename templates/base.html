@@ -20,7 +20,6 @@
             margin: 0;
         }
 
-        /* Navbar */
         .navbar-custom {
             background-color: #ffffff;
             border-bottom: 1px solid #dbdbdb;
@@ -35,24 +34,22 @@
         .nav-link {
             color: #262626 !important;
             font-weight: 500;
+            position: relative;
         }
 
         .nav-link:hover {
             color: #0095f6 !important;
         }
 
-        /* Layout */
         .container-custom {
             max-width: 900px;
         }
 
-        /* Cards */
         .card {
             border-radius: 12px;
             border: 1px solid #dbdbdb;
         }
 
-        /* Buttons */
         .btn-primary {
             background-color: #0095f6;
             border: none;
@@ -62,6 +59,25 @@
         .btn-primary:hover {
             background-color: #0077cc;
         }
+
+        /* 🔥 Красный круг для уведомлений */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -10px;
+            background-color: #ff3b30;
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: 1px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -70,7 +86,7 @@
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-custom px-4">
-    <a class="navbar-brand" href="{% url 'post_list' %}">InstaClone</a>
+    <a class="navbar-brand" href="{% url 'posts:post_list' %}">InstaClone</a>
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
         <span class="navbar-toggler-icon"></span>
@@ -88,12 +104,17 @@
                     <a href="{% url 'accounts:all_users' %}" class="nav-link">Пользователи</a>
                 </li>
 
-                <li class="nav-item">
-                    <a href="{% url 'accounts:friend_requests' %}" class="nav-link">Запросы</a>
+                <li class="nav-item position-relative">
+                    <a href="{% url 'accounts:friend_requests' %}" class="nav-link">
+                        Запросы
+                        {% if incoming_count and incoming_count > 0 %}
+                            <span class="notification-badge">{{ incoming_count }}</span>
+                        {% endif %}
+                    </a>
                 </li>
 
                 <li class="nav-item">
-                    <a href="{% url 'post_create' %}" class="nav-link">Создать пост</a>
+                    <a href="{% url 'posts:post_create' %}" class="nav-link">Создать пост</a>
                 </li>
 
                 <li class="nav-item">

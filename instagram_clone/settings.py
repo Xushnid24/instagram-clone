@@ -64,10 +64,14 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+
+                # 🔥 Вот сюда добавляем свой
+                'accounts.context_processors.friend_requests_count',
             ],
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'instagram_clone.wsgi.application'
 

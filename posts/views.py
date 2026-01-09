@@ -20,12 +20,13 @@ def post_list(request):
     return render(request, 'posts/post_list.html', {'posts': posts, 'comment_form': comment_form})
 
 
-
 def post_create(request):
     if request.method == 'POST':
-        form = PostForm(request.POST, request.FILES)   # ← ОБЯЗАТЕЛЬНО!
+        form = PostForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            post = form.save(commit=False)
+            post.author = request.user   # 🔥 ВАЖНО
+            post.save()
             return redirect('post_list')
     else:
         form = PostForm()
@@ -59,3 +60,11 @@ def post_delete(request, pk):
         post.delete()
         return redirect('post_list')
     return render(request, 'posts/post_delete.html', {'post': post})
+
+from django.shortcuts import render, get_object_or_404
+from .models import Post
+
+def post_detail(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    return render(request, 'posts/post_detail.html', {'post': post})
+

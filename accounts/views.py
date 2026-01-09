@@ -15,6 +15,7 @@ from django.core.exceptions import ValidationError
 from .forms import RegisterForm
 from .models import FriendRequest, Profile, BlockedUser
 from .services import FriendshipService
+from posts.models import Post
 
 
 # ============ Authentication Views ============
@@ -314,12 +315,30 @@ class ProfileView(LoginRequiredMixin, DetailView):
         context['profile'] = profile
         context['is_self'] = (self.request.user == profile_user)
         context['is_friend'] = self.request.user.profile.are_friends(profile)
-        context['request_sent'] = FriendRequest.objects.filter(from_user=self.request.user, to_user=profile_user, status='pending').exists()
-        context['incoming_request'] = FriendRequest.objects.filter(from_user=profile_user, to_user=self.request.user, status='pending').first()
-        context['is_blocked'] = BlockedUser.objects.filter(blocker=self.request.user, blocked=profile_user).exists()
-        context['friends'] = profile.friends.select_related('user')[:12]
-        if hasattr(profile_user, 'post_set'):
-            context['posts'] = profile_user.post_set.all()[:9]
+        context['request_sent'] = FriendRequest.objects.filter(
+            from_user=self.request.user,
+            to_user=profile_user,
+            status='pending'
+        ).exists()
+        context['incoming_request'] = FriendRequest.objects.filter(
+            from_user=profile_user,
+            to_user=self.request.user,
+            status='pending'
+        ).first()
+        context['is_blocked'] = BlockedUser.objects.filter(
+            blocker=self.request.user,
+            blocked=profile_user
+        ).exists()
+
+        # Друзья — выбираем Profile объектов друзей
+        context['friends'] = profile.friends.all()[:12]  # уже Profile объекты
+
+        # Посты
+        context['posts'] = Post.objects.filter(
+            author=profile_user
+        ).order_by('-created_at')[:9]
+
+        return context
 
         return context
 

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+
+        {% if post.image %}
+            <img src="{{ post.image.url }}" class="card-img-top" alt="Post image">
+        {% endif %}
+
+        <div class="card-body">
+            <h4>{{ post.title }}</h4>
+
+            <p class="text-muted">
+                Автор:
+                <a href="{% url 'accounts:profile' post.author.id %}">
+                    {{ post.author.username }}
+                </a>
+                · {{ post.created_at|date:"d M Y" }}
+            </p>
+
+            <p>{{ post.content }}</p>
+
+            <a href="{% url 'posts:post_list' %}" class="btn btn-outline-secondary">
+                ← Назад к ленте
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

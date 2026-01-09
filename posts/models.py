@@ -1,7 +1,16 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import User
+
 
 class Post(models.Model):
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='posts',
+        null=True,      # временно, чтобы миграция прошла
+        blank=True
+    )
     title = models.CharField(max_length=200, default="Без заголовка")
     content = models.TextField(default="Пост пока пустой")
     image = models.ImageField(upload_to='post_images/', blank=True, null=True)
@@ -10,6 +19,8 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+
+
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')

@@ -4,15 +4,20 @@
 {% block content %}
 <div class="card card-custom p-4">
     <h2 class="text-danger">Удалить пост</h2>
+
     <h4>{{ post.title }}</h4>
     <p>{{ post.content }}</p>
-    <p class="text-muted">Создан: {{ post.created_at|date:"d.m.Y H:i" }}</p>
+    <p class="text-muted">
+        Создан: {{ post.created_at|date:"d.m.Y H:i" }}
+    </p>
 
     <form method="post" class="mt-3 d-inline">
         {% csrf_token %}
         <button class="btn btn-danger">Удалить навсегда</button>
     </form>
 
-    <a href="{% url 'post_list' %}" class="btn btn-secondary ms-2">Отмена</a>
+    <a href="{% url 'posts:post_list' %}" class="btn btn-secondary ms-2">
+        Отмена
+    </a>
 </div>
 {% endblock %}

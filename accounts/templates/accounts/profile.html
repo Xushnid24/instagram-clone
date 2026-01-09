@@ -204,43 +204,31 @@
     <!-- Friends Section -->
     <div class="card shadow-sm mb-4">
         <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0">
-                    <i class="bi bi-people"></i> Друзья
-                    <span class="badge bg-primary">{{ profile.friends.count }}</span>
-                </h4>
-                {% if profile.friends.count > 12 %}
-                    <a href="{% url 'accounts:friends_list' profile_user.id %}" class="btn btn-sm btn-outline-primary">
-                        Показать всех
-                    </a>
-                {% endif %}
-            </div>
+            <h4 class="mb-3">
+                <i class="bi bi-people"></i> Друзья
+            </h4>
 
-            {% if profile.friends.count > 0 %}
-                <div class="row g-3">
+            {% if friends %}
+                <div class="row g-2">
                     {% for friend in friends %}
-                        <div class="col-6 col-md-4 col-lg-2">
-                            <div class="friend-card">
-                                <a href="{% url 'accounts:profile' friend.user.id %}" class="text-decoration-none">
+                        <div class="col-6 col-md-3 col-lg-2">
+                            <a href="{% url 'accounts:profile' friend.user.id %}" class="text-decoration-none text-dark">
+                                <div class="friend-card">
                                     {% if friend.avatar %}
-                                        <img src="{{ friend.avatar.url }}" class="friend-avatar" alt="{{ friend.user.username }}">
+                                        <img src="{{ friend.avatar.url }}" class="friend-avatar rounded" alt="{{ friend.user.username }}">
                                     {% else %}
-                                        <img src="https://ui-avatars.com/api/?name={{ friend.user.username }}&size=150"
-                                             class="friend-avatar" alt="{{ friend.user.username }}">
+                                        <img src="https://ui-avatars.com/api/?name={{ friend.user.username }}" class="friend-avatar rounded" alt="{{ friend.user.username }}">
                                     {% endif %}
-                                    <div class="p-2 text-center bg-light">
-                                        <small class="text-dark fw-bold">{{ friend.user.username }}</small>
+                                    <div class="text-center py-1">
+                                        <small>{{ friend.user.username }}</small>
                                     </div>
-                                </a>
-                            </div>
+                                </div>
+                            </a>
                         </div>
                     {% endfor %}
                 </div>
             {% else %}
-                <div class="text-center py-5 text-muted">
-                    <i class="bi bi-people" style="font-size: 3rem;"></i>
-                    <p class="mt-2">Пока нет друзей</p>
-                </div>
+                <p class="text-muted mb-0">Пока нет друзей</p>
             {% endif %}
         </div>
     </div>
@@ -255,11 +243,13 @@
             {% if posts %}
                 <div class="row g-2">
                     {% for post in posts %}
+                        {% if post.image %}
                         <div class="col-4">
-                            <a href="{% url 'post_detail' post.id %}">
+                            <a href="{% url 'posts:post_detail' post.id %}">
                                 <img src="{{ post.image.url }}" class="img-fluid rounded" alt="Post">
                             </a>
                         </div>
+                        {% endif %}
                     {% endfor %}
                 </div>
             {% else %}
@@ -272,133 +262,4 @@
     </div>
 
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-// CSRF Token
-const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-// Отправить запрос в друзья
-async function sendFriendRequest(userId) {
-    try {
-        const response = await fetch(`/accounts/send-request/${userId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrftoken,
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            showNotification('Запрос отправлен!', 'success');
-            setTimeout(() => location.reload(), 1000);
-        } else {
-            showNotification(data.error || 'Ошибка', 'danger');
-        }
-    } catch (error) {
-        showNotification('Ошибка сети', 'danger');
-    }
-}
-
-// Обработка запроса (принять/отклонить)
-async function handleFriendRequest(requestId, action) {
-    const url = action === 'accept'
-        ? `/accounts/accept-request/${requestId}/`
-        : `/accounts/reject-request/${requestId}/`;
-
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrftoken,
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            showNotification(data.message, 'success');
-            setTimeout(() => location.reload(), 1000);
-        }
-    } catch (error) {
-        showNotification('Ошибка', 'danger');
-    }
-}
-
-// Удалить из друзей
-async function removeFriend(userId) {
-    if (!confirm('Удалить из друзей?')) return;
-
-    try {
-        const response = await fetch(`/accounts/remove-friend/${userId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrftoken,
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            showNotification('Удалено из друзей', 'info');
-            setTimeout(() => location.reload(), 1000);
-        }
-    } catch (error) {
-        showNotification('Ошибка', 'danger');
-    }
-}
-
-// Отменить запрос
-async function cancelRequest(userId) {
-    if (!confirm('Отменить запрос в друзья?')) return;
-
-    try {
-        const response = await fetch(`/accounts/cancel-request/${userId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrftoken,
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            showNotification('Запрос отменён', 'info');
-            setTimeout(() => location.reload(), 1000);
-        } else {
-            showNotification(data.error || 'Ошибка', 'danger');
-        }
-    } catch (error) {
-        showNotification('Ошибка сети', 'danger');
-    }
-}
-
-// Отправить сообщение
-function sendMessage(userId) {
-    // Перенаправление на страницу чата
-    window.location.href = `/messages/${userId}/`;
-}
-
-// Показать уведомление
-function showNotification(message, type = 'info') {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-    alertDiv.style.top = '20px';
-    alertDiv.style.right = '20px';
-    alertDiv.style.zIndex = '9999';
-    alertDiv.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    document.body.appendChild(alertDiv);
-
-    setTimeout(() => alertDiv.remove(), 3000);
-}
-</script>
 {% endblock %}
